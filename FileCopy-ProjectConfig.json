@@ -1,0 +1,6 @@
+{
+    "srcFiles": [
+        ".*\\.lua$"
+    ],
+    "outputFolder": "C:/DefaultFolder"
+}
