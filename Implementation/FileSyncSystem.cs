@@ -4,10 +4,10 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CometPeak.FileCopier {
-    public class FileCopySystem : IFileCopySystem {
+namespace CometPeak.FileSyncSystem {
+    public class FileSyncSystem : IFileSyncSystem {
         private string directory;
-        private FileCopySettings settings;
+        private FileSyncSettings settings;
 
         private Task running;
         private CancellationToken cancellation;     //WARNING: Accessed on multiple threads!
@@ -15,9 +15,9 @@ namespace CometPeak.FileCopier {
 
         private object syncRoot = new();
 
-        public FileCopySystem() { }
+        public FileSyncSystem() { }
 
-        public Task StartListening(string directory, FileCopySettings settings, CancellationToken cancellation) {
+        public Task StartListening(string directory, FileSyncSettings settings, CancellationToken cancellation) {
             this.directory = directory;
             this.settings = settings;
             SetCancellationToken(cancellation);
@@ -110,7 +110,7 @@ namespace CometPeak.FileCopier {
             fileWatcher = null;
         }
 
-        private bool ShouldBeCopied(FileCopySettings settings, string fileName) {
+        private bool ShouldBeCopied(FileSyncSettings settings, string fileName) {
             if (settings.ignoreFiles != null)
                 foreach (string pattern in settings.ignoreFiles)
                     if (Regex.IsMatch(fileName, pattern))

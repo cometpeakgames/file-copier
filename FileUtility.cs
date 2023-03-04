@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace CometPeak.FileCopier {
+namespace CometPeak.FileSyncSystem {
     public static class FileUtility {
         public static IEnumerable<string> GetParentFolders(string currentDirectory) {
             currentDirectory = currentDirectory.Replace('\\', '/');
@@ -15,7 +15,6 @@ namespace CometPeak.FileCopier {
 
             for (int i = folderNames.Length - 1; i >= 0; i--) {
                 string folderPath = currentDirectory.Substring(0, originalLength - lengthSubtracted);
-
                 yield return folderPath;
 
                 lengthSubtracted += folderNames[i].Length;

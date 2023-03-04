@@ -1,18 +1,17 @@
 ﻿using System;
 using System.IO;
-using System.Text.RegularExpressions;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Linq;
 
-namespace CometPeak.FileCopier {
-    public class FileCopySettingsSystem : IFileCopySettingsSystem {
-        private const string ProjectConfigFileName = "FileCopy-ProjectConfig.json";
-        private const string UserConfigFileName = "FileCopy-UserConfig.json";
+namespace CometPeak.FileSyncSystem {
+    public class FileSyncSettingsSystem : IFileSyncSettingsSystem {
+        private const string ProjectConfigFileName = "FileSync-ProjectConfig.json";
+        private const string UserConfigFileName = "FileSync-UserConfig.json";
 
-        public FileCopySettingsSystem() { }
+        public FileSyncSettingsSystem() { }
 
         public void FindConfigFilePaths(string currentDirectory, out string userConfigPath, out string projectConfigPath) {
             userConfigPath = null;
@@ -38,13 +37,13 @@ namespace CometPeak.FileCopier {
             }
         }
 
-        public async Task<FileCopySettings> CombineSettings(string userConfigPath, string projectConfigPath) {
-            FileCopySettings userSettings = null;
-            FileCopySettings projectSettings = null;
+        public async Task<FileSyncSettings> CombineSettings(string userConfigPath, string projectConfigPath) {
+            FileSyncSettings userSettings = null;
+            FileSyncSettings projectSettings = null;
             JObject userJson = null;
             JObject projectJson = null;
 
-            async Task<(FileCopySettings, JObject)> LoadAsync(string configFilePath) {
+            async Task<(FileSyncSettings, JObject)> LoadAsync(string configFilePath) {
                 using (FileStream file = File.OpenRead(configFilePath))
                 using (StreamReader reader = new(file))
                 using (JsonTextReader jsonReader = new(reader)) {
@@ -52,23 +51,23 @@ namespace CometPeak.FileCopier {
 
                     //NOTE: We CANNOT do this, because we already advanced the jsonReader to the end of the stream...
                     //      serializer.Value.Deserialize<FileCopySettings>(jsonReader);
-                    FileCopySettings settings = json.ToObject<FileCopySettings>();
+                    FileSyncSettings settings = json.ToObject<FileSyncSettings>();
                     return (settings, json);
                 }
             }
 
             if (userConfigPath != null) {
-                (FileCopySettings, JObject) pair = await LoadAsync(userConfigPath);
+                (FileSyncSettings, JObject) pair = await LoadAsync(userConfigPath);
                 userSettings = pair.Item1;
                 userJson = pair.Item2;
             }
             if (projectConfigPath != null) {
-                (FileCopySettings, JObject) pair = await LoadAsync(projectConfigPath);
+                (FileSyncSettings, JObject) pair = await LoadAsync(projectConfigPath);
                 projectSettings = pair.Item1;
                 projectJson = pair.Item2;
             }
 
-            FileCopySettings combined;
+            FileSyncSettings combined;
             bool needsToCombineFieldByField = true;
 
             if (userSettings == null) {
@@ -82,7 +81,7 @@ namespace CometPeak.FileCopier {
             }
 
             if (needsToCombineFieldByField) {
-                FieldInfo[] allFields = typeof(FileCopySettings).GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetField | BindingFlags.SetField);
+                FieldInfo[] allFields = typeof(FileSyncSettings).GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetField | BindingFlags.SetField);
 
                 foreach (FieldInfo field in allFields) {
                     bool hasUserValue = userJson.ContainsKey(field.Name) && userJson[field.Name].Type != JTokenType.Null;

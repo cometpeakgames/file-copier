@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace CometPeak.FileCopier {
+namespace CometPeak.FileSyncSystem {
     [Serializable]
-    public class FileCopySettings {
+    public class FileSyncSettings {
         public string[] srcFiles;
         public string[] ignoreFiles;
         public string outputFolder;
 
-        public FileCopySettings() { }
+        public FileSyncSettings() { }
     }
 }
