@@ -5,9 +5,14 @@ using System.Text.RegularExpressions;
 
 namespace CometPeak.FileSyncSystem {
     public static class FileUtility {
+        public static string SanitizePath(string path) {
+            string result = path.Replace('\\', '/');
+            result = Regex.Replace(result, "/{2,}", "/");
+            return result;
+        }
+
         public static IEnumerable<string> GetParentFolders(string currentDirectory) {
-            currentDirectory = currentDirectory.Replace('\\', '/');
-            currentDirectory = Regex.Replace(currentDirectory, "/{2,}", "/");
+            currentDirectory = SanitizePath(currentDirectory);
             string[] folderNames = currentDirectory.Split('/');
 
             int originalLength = currentDirectory.Length;

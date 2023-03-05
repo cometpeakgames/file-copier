@@ -19,7 +19,7 @@ namespace CometPeak.FileSyncSystem {
             
             foreach (string folderPath in FileUtility.GetParentFolders(currentDirectory)) {
                 string[] filePaths = Directory.GetFiles(folderPath, "*.json");
-                foreach (string filePath in filePaths.Select(p => p.Replace('\\', '/'))) {
+                foreach (string filePath in filePaths.Select(p => FileUtility.SanitizePath(p))) {
                     string fileName = Path.GetFileName(filePath);
                     switch (fileName) {
                         case UserConfigFileName:
@@ -68,19 +68,15 @@ namespace CometPeak.FileSyncSystem {
             }
 
             FileSyncSettings combined;
-            bool needsToCombineFieldByField = true;
+            int foundCount = 0;
+            if (userSettings != null)
+                foundCount++;
+            if (projectSettings != null)
+                foundCount++;
 
-            if (userSettings == null) {
-                needsToCombineFieldByField = false;
-                combined = projectSettings;
-            } else if (projectSettings == null) {
-                needsToCombineFieldByField = false;
-                combined = userSettings;
-            } else {
+            if (foundCount >= 2) {
                 combined = new();
-            }
 
-            if (needsToCombineFieldByField) {
                 FieldInfo[] allFields = typeof(FileSyncSettings).GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetField | BindingFlags.SetField);
 
                 foreach (FieldInfo field in allFields) {
@@ -92,6 +88,10 @@ namespace CometPeak.FileSyncSystem {
                     else if (hasProjectValue)
                         field.SetValue(combined, field.GetValue(projectSettings));
                 }
+            } else if (foundCount == 1) {
+                combined = (userSettings == null) ? projectSettings : userSettings;
+            } else {
+                combined = new();
             }
 
             Console.WriteLine("Settings: " + JObject.FromObject(combined).ToString(Formatting.Indented) + "\n");

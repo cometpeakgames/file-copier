@@ -8,6 +8,9 @@ namespace CometPeak.FileSyncSystem {
     public class Program {
         public static async Task Main(string[] args) {
             string currentDirectory = Environment.CurrentDirectory;
+            currentDirectory = FileUtility.SanitizePath(currentDirectory);
+
+            Console.WriteLine("File Sync System starting in " + currentDirectory + " ...\n");
 
             using (IContainer container = new Container()) {
                 container.Bind<IFileSyncSettingsSystem, FileSyncSettingsSystem>();
@@ -33,7 +36,6 @@ namespace CometPeak.FileSyncSystem {
                 string projectPath = (projectConfigPath == null) ? null : Path.GetDirectoryName(projectConfigPath);
                 string listenDirectory = (projectPath != null) ? projectPath : currentDirectory;
 
-                Console.WriteLine("Listening in directory:    " + listenDirectory + "\n");
                 IFileSyncSystem sync = container.Resolve<IFileSyncSystem>();
                 await sync.StartListening(listenDirectory, settings);
             }
